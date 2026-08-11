@@ -1,0 +1,173 @@
+# ================================
+# SasyaVedha - Smart Farming Assistant
+# .gitignore
+# ================================
+
+# ──────────────────────────────
+# Python / Flask Backend
+# ──────────────────────────────
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+*.pyd
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+.env/
+myenv/
+
+# Environment variables
+.env
+.env.local
+.env.production
+*.env
+
+# Flask instance folder
+instance/
+flask_session/
+
+# ML Model files (too large for git — store in cloud)
+models/*.pkl
+models/*.h5
+models/*.pt
+models/*.pth
+models/*.joblib
+models/*.bin
+*.pkl
+*.h5
+
+# Jupyter Notebooks checkpoints
+.ipynb_checkpoints/
+*.ipynb
+
+# Python distribution / packaging
+dist/
+build/
+*.egg-info/
+*.egg
+MANIFEST
+
+# pytest / testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+
+# mypy
+.mypy_cache/
+
+# ──────────────────────────────
+# Node.js / React Frontend
+# ──────────────────────────────
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+package-lock.json
+yarn.lock
+
+# React build output
+frontend/build/
+frontend/dist/
+
+# ──────────────────────────────
+# Database
+# ──────────────────────────────
+*.db
+*.sqlite
+*.sqlite3
+*.sql
+db.json
+
+# ──────────────────────────────
+# Logs
+# ──────────────────────────────
+logs/
+*.log
+*.log.*
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ──────────────────────────────
+# OS & Editor Files
+# ──────────────────────────────
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+
+# VS Code
+.vscode/
+*.code-workspace
+
+# PyCharm / IntelliJ
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+
+# ──────────────────────────────
+# Data & Uploads
+# ──────────────────────────────
+
+# User uploaded images (disease detection)
+backend/uploads/
+frontend/public/uploads/
+uploads/
+
+# Large datasets (download separately from Kaggle)
+data/
+datasets/
+*.csv
+*.xlsx
+*.xls
+*.json.gz
+*.zip
+*.tar.gz
+*.tar
+*.rar
+
+# ──────────────────────────────
+# Secrets & API Keys
+# ──────────────────────────────
+secrets.py
+config.py
+local_settings.py
+*.pem
+*.key
+*.cert
+*.p12
+
+# ──────────────────────────────
+# Misc
+# ──────────────────────────────
+.cache/
+.temp/
+tmp/
+temp/
+
+
