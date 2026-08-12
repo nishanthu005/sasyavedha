@@ -1,35 +1,32 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { FiBarChart2, FiEdit2, FiLayers, FiPlus, FiSave, FiX } from 'react-icons/fi';
-
-const initialFarms = [
-  { id: 1, name: 'Green Valley Farm', location: 'Nashik, Maharashtra', area: 45, fields: 8, manager: 'Rajesh Kumar', status: 'Active', crops: ['Rice', 'Wheat', 'Cotton'], health: 85, lastUpdated: '2025-04-03' },
-  { id: 2, name: 'Sunshine Acres', location: 'Pune, Maharashtra', area: 32, fields: 6, manager: 'Priya Sharma', status: 'Active', crops: ['Tomato', 'Maize'], health: 92, lastUpdated: '2025-04-03' },
-  { id: 3, name: 'Golden Harvest', location: 'Satara, Maharashtra', area: 28, fields: 5, manager: 'Amit Patel', status: 'Maintenance', crops: ['Sugarcane', 'Soybean'], health: 78, lastUpdated: '2025-04-02' },
-];
+import { createFarm, getFarms, updateFarm } from '../context/api';
 
 const emptyFarm = {
   name: '',
   location: '',
   area: '',
   fields: '',
-  manager: '',
   status: 'Active',
   crops: '',
 };
 
 export default function FarmManagement({ setCurrentPage }) {
-  const [farms, setFarms] = useState(initialFarms);
+  const [farms, setFarms] = useState([]);
   const [selectedFarm, setSelectedFarm] = useState(null);
   const [formOpen, setFormOpen] = useState(false);
   const [editingFarm, setEditingFarm] = useState(null);
   const [form, setForm] = useState(emptyFarm);
   const [message, setMessage] = useState('');
+  const [loading, setLoading] = useState(true);
+
+  const loadFarms = () => getFarms().then(response => setFarms(response.data.farms)).catch(() => setMessage('Could not load farms.')).finally(() => setLoading(false));
+  useEffect(() => { loadFarms(); }, []);
 
   const summary = useMemo(() => ({
     farms: farms.length,
     area: farms.reduce((sum, farm) => sum + Number(farm.area), 0),
     fields: farms.reduce((sum, farm) => sum + Number(farm.fields), 0),
-    health: Math.round(farms.reduce((sum, farm) => sum + farm.health, 0) / Math.max(farms.length, 1)),
   }), [farms]);
 
   const openAdd = () => {
@@ -44,40 +41,28 @@ export default function FarmManagement({ setCurrentPage }) {
     setFormOpen(true);
   };
 
-  const saveFarm = (event) => {
+  const saveFarm = async (event) => {
     event.preventDefault();
     const payload = {
       ...form,
       area: Number(form.area),
       fields: Number(form.fields),
       crops: form.crops.split(',').map(crop => crop.trim()).filter(Boolean),
-      health: editingFarm?.health || 80,
-      lastUpdated: new Date().toISOString().slice(0, 10),
     };
-
-    if (editingFarm) {
-      setFarms(prev => prev.map(farm => farm.id === editingFarm.id ? { ...farm, ...payload } : farm));
-      setMessage(`${payload.name} updated`);
-    } else {
-      setFarms(prev => [{ ...payload, id: Date.now() }, ...prev]);
-      setMessage(`${payload.name} added`);
-    }
-
-    setFormOpen(false);
-    setEditingFarm(null);
+    try {
+      if (editingFarm) await updateFarm(editingFarm.id, payload); else await createFarm(payload);
+      await loadFarms(); setMessage(`${payload.name} saved.`); setFormOpen(false); setEditingFarm(null);
+    } catch (error) { setMessage(error.response?.data?.message || 'Farm could not be saved.'); }
   };
 
-  const manageFields = (farm) => {
-    setSelectedFarm(farm.id);
-    setMessage(`Field tools opened for ${farm.name}. Select field counts and crops from this farm card.`);
-  };
+  const manageFields = () => setMessage('Individual field records are not implemented yet; field count is stored at farm level.');
 
   return (
     <div className="fade-in">
       <div className="page-header">
         <div>
           <div className="page-title">Farm Management</div>
-          <div className="page-sub">Multi-farm operations and field management</div>
+          <div className="page-sub">Saved farm records</div>
         </div>
         <button className="btn btn-blue" onClick={openAdd}>
           <FiPlus /> Add Farm
@@ -90,13 +75,13 @@ export default function FarmManagement({ setCurrentPage }) {
         <div className="card"><div className="stat-value" style={{ color: 'var(--green)' }}>{summary.farms}</div><div className="stat-label">Total Farms</div></div>
         <div className="card"><div className="stat-value" style={{ color: 'var(--blue)' }}>{summary.area}</div><div className="stat-label">Total Area (ha)</div></div>
         <div className="card"><div className="stat-value" style={{ color: 'var(--orange)' }}>{summary.fields}</div><div className="stat-label">Total Fields</div></div>
-        <div className="card"><div className="stat-value" style={{ color: 'var(--purple)' }}>{summary.health}%</div><div className="stat-label">Avg Health</div></div>
+        <div className="card"><div className="stat-value" style={{ color: 'var(--purple)' }}>{farms.filter(farm => farm.status === 'Active').length}</div><div className="stat-label">Active farms</div></div>
       </div>
 
       <div className="card">
         <div className="section-title">Farm Portfolio</div>
         <div style={{ display: 'grid', gap: '12px' }}>
-          {farms.map(farm => {
+          {loading ? <div style={{ color: 'var(--text-muted)' }}>Loading saved farms…</div> : farms.length === 0 ? <div style={{ color: 'var(--text-muted)' }}>No farms saved yet. Add your first farm.</div> : farms.map(farm => {
             const active = selectedFarm === farm.id;
             return (
               <div key={farm.id} className="soft-row" style={{ borderColor: active ? 'var(--text-muted)' : 'var(--border)' }}>
@@ -116,11 +101,10 @@ export default function FarmManagement({ setCurrentPage }) {
                   </div>
                 </button>
 
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '12px', marginTop: '16px' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', marginTop: '16px' }}>
                   <div><div className="stat-label">Area</div><div style={{ fontWeight: 800 }}>{farm.area} ha</div></div>
                   <div><div className="stat-label">Fields</div><div style={{ fontWeight: 800 }}>{farm.fields}</div></div>
-                  <div><div className="stat-label">Manager</div><div style={{ fontWeight: 800 }}>{farm.manager}</div></div>
-                  <div><div className="stat-label">Health</div><div style={{ fontWeight: 800, color: farm.health >= 85 ? 'var(--green)' : 'var(--orange)' }}>{farm.health}%</div></div>
+                  <div><div className="stat-label">Last updated</div><div style={{ fontWeight: 800 }}>{new Date(farm.updated_at).toLocaleDateString()}</div></div>
                 </div>
 
                 {active && (
@@ -149,7 +133,6 @@ export default function FarmManagement({ setCurrentPage }) {
                 <input className="input" type="number" min="1" placeholder="Area (hectares)" value={form.area} onChange={e => setForm(prev => ({ ...prev, area: e.target.value }))} required />
                 <input className="input" type="number" min="1" placeholder="Number of Fields" value={form.fields} onChange={e => setForm(prev => ({ ...prev, fields: e.target.value }))} required />
               </div>
-              <input className="input" placeholder="Manager Name" value={form.manager} onChange={e => setForm(prev => ({ ...prev, manager: e.target.value }))} required />
               <input className="input" placeholder="Crops, comma separated" value={form.crops} onChange={e => setForm(prev => ({ ...prev, crops: e.target.value }))} required />
               <select className="select" value={form.status} onChange={e => setForm(prev => ({ ...prev, status: e.target.value }))}>
                 <option>Active</option>

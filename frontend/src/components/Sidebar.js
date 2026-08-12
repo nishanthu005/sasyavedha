@@ -17,7 +17,7 @@ import {
 } from 'react-icons/fi';
 import { GiPlantRoots, GiTestTubes, GiWaterDrop } from 'react-icons/gi';
 
-export default function Sidebar({ activeTab, setActiveTab, sensorData, onToggleMode }) {
+export default function Sidebar({ activeTab, setActiveTab, onToggleMode }) {
   const { t } = useLang();
   const { state, district, season } = useLocation();
   const { user, logout } = useAuth();
@@ -85,26 +85,6 @@ export default function Sidebar({ activeTab, setActiveTab, sensorData, onToggleM
             );
           })}
         </nav>
-
-        <div style={{ padding: '14px', borderTop: '1px solid var(--border)' }}>
-          <div style={{ fontSize: '10px', color: 'var(--text-dim)', letterSpacing: '1.5px', marginBottom: '8px', textTransform: 'uppercase' }}>{t.liveSensors}</div>
-          <div style={{ display: 'flex', gap: '8px', marginBottom: '10px' }}>
-            <div className="soft-row" style={{ flex: 1, padding: '10px', textAlign: 'center' }}>
-              <FiThermometer className="inline-icon" color="var(--orange)" />
-              <div style={{ fontSize: '17px', fontWeight: 800, color: 'var(--orange)' }}>{sensorData.temp} C</div>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{t.temp}</div>
-            </div>
-            <div className="soft-row" style={{ flex: 1, padding: '10px', textAlign: 'center' }}>
-              <FiDroplet className="inline-icon" color="var(--blue)" />
-              <div style={{ fontSize: '17px', fontWeight: 800, color: 'var(--blue)' }}>{sensorData.moisture}%</div>
-              <div style={{ fontSize: '10px', color: 'var(--text-muted)', marginTop: '2px' }}>{t.moisture}</div>
-            </div>
-          </div>
-          <div className="soft-row" style={{ display: 'flex', alignItems: 'center', gap: '6px', padding: '7px 10px' }}>
-            <FiActivity size={12} color="var(--green)" />
-            <span style={{ fontSize: '11px', color: 'var(--text-muted)' }}>{t.iotOnline}</span>
-          </div>
-        </div>
 
         <div className="sidebar-mode-switch" style={{ display: 'grid', gap: '8px' }}>
           <button className="btn btn-secondary" onClick={onToggleMode}>

@@ -5,7 +5,7 @@ import { useLang } from '../context/LanguageContext';
 import { getCropLabel } from '../context/cropLocalization';
 
 const crops = ['Rice', 'Wheat', 'Maize', 'Tomato', 'Cotton', 'Sugarcane', 'Soybean'];
-const defaults = { crop: 'Rice', rainfall: 850, temperature: 28, soil_n: 120, soil_p: 60, soil_k: 80, ph: 6.5, fertilizer: 200, area: 2 };
+const defaults = { crop: 'Rice', location: 'Pune, Maharashtra', area: 2 };
 
 const CustomTooltip = ({ active, payload, label }) => {
   if (active && payload?.length) return (
@@ -40,7 +40,6 @@ export default function YieldPrediction() {
           <div className="page-title"> {t.yieldTitle}</div>
           <div className="page-sub">{t.yieldSub}</div>
         </div>
-        <span className="tag tag-cyan">{t.modelTag}</span>
       </div>
 
       {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', color: '#EF4444', fontSize: '13px' }}> {error}</div>}
@@ -54,19 +53,10 @@ export default function YieldPrediction() {
               {crops.map(c => <option key={c} value={c}>{getCropLabel(c, lang)}</option>)}
             </select>
           </div>
-          {[
-            { key: 'rainfall', label: t.rainfall },
-            { key: 'temperature', label: t.temperature },
-            { key: 'soil_n', label: t.soilN },
-            { key: 'soil_p', label: t.soilP },
-            { key: 'soil_k', label: t.soilK },
-            { key: 'ph', label: t.soilPh, step: 0.1 },
-            { key: 'fertilizer', label: t.fertilizerUsed },
-            { key: 'area', label: t.fieldArea, step: 0.1 },
-          ].map(f => (
+          {[{ key: 'location', label: 'Farm location', type: 'text' }, { key: 'area', label: t.fieldArea, step: 0.1 }].map(f => (
             <div key={f.key}>
               <label>{f.label}</label>
-              <input type="number" className="input" value={form[f.key]} step={f.step || 1} onChange={e => update(f.key, parseFloat(e.target.value) || 0)} />
+              <input type={f.type || 'number'} className="input" value={form[f.key]} step={f.step || 1} onChange={e => update(f.key, f.type === 'text' ? e.target.value : parseFloat(e.target.value) || 0)} />
             </div>
           ))}
         </div>
@@ -134,6 +124,7 @@ export default function YieldPrediction() {
               ))}
             </div>
           </div>
+          {result.weather && <div className="card" style={{ marginTop: '20px', fontSize: '13px', color: 'var(--text-muted)' }}>Live weather for <strong style={{ color: '#CBD5E1' }}>{result.weather.location}</strong>: {result.weather.temperature}°C, {result.weather.humidity}% humidity, {result.weather.forecast_rainfall} mm forecast rain.</div>}
         </div>
       )}
     </div>

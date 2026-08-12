@@ -52,6 +52,21 @@ def init_db():
                 FOREIGN KEY (user_id) REFERENCES users (id) ON DELETE CASCADE
             )
         """)
+        conn.execute("""
+            CREATE TABLE IF NOT EXISTS farms (
+                id TEXT PRIMARY KEY,
+                owner_id TEXT NOT NULL,
+                name TEXT NOT NULL,
+                location TEXT NOT NULL,
+                area_hectares REAL NOT NULL CHECK(area_hectares > 0),
+                field_count INTEGER NOT NULL DEFAULT 0 CHECK(field_count >= 0),
+                crops_json TEXT NOT NULL DEFAULT '[]',
+                status TEXT NOT NULL DEFAULT 'Active',
+                created_at TEXT NOT NULL,
+                updated_at TEXT NOT NULL,
+                FOREIGN KEY (owner_id) REFERENCES users (id) ON DELETE CASCADE
+            )
+        """)
         columns = {row["name"] for row in conn.execute("PRAGMA table_info(users)")}
         if "is_active" not in columns:
             conn.execute("ALTER TABLE users ADD COLUMN is_active INTEGER NOT NULL DEFAULT 1")
@@ -234,5 +249,43 @@ def update_user_access(user_id, role=None, is_active=None):
         conn.execute(f"UPDATE users SET {', '.join(updates)} WHERE id = ?", values)
         conn.commit()
         return _user_row_to_dict(conn.execute("SELECT * FROM users WHERE id = ?", (user_id,)).fetchone()), None
+    finally:
+        conn.close()
+
+
+def _farm_to_dict(row):
+    import json
+    return {"id": row["id"], "name": row["name"], "location": row["location"], "area": row["area_hectares"], "fields": row["field_count"], "crops": json.loads(row["crops_json"]), "status": row["status"], "created_at": row["created_at"], "updated_at": row["updated_at"]}
+
+
+def list_farms(owner_id):
+    conn = get_db()
+    try:
+        return [_farm_to_dict(row) for row in conn.execute("SELECT * FROM farms WHERE owner_id = ? ORDER BY updated_at DESC", (owner_id,))]
+    finally:
+        conn.close()
+
+
+def create_farm(owner_id, data):
+    import json
+    now, farm_id = datetime.now().isoformat(), secrets.token_hex(12)
+    conn = get_db()
+    try:
+        conn.execute("INSERT INTO farms (id, owner_id, name, location, area_hectares, field_count, crops_json, status, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", (farm_id, owner_id, data["name"], data["location"], data["area"], data["fields"], json.dumps(data["crops"]), data["status"], now, now))
+        conn.commit()
+        return _farm_to_dict(conn.execute("SELECT * FROM farms WHERE id = ?", (farm_id,)).fetchone())
+    finally:
+        conn.close()
+
+
+def update_farm(owner_id, farm_id, data):
+    import json
+    now = datetime.now().isoformat()
+    conn = get_db()
+    try:
+        conn.execute("UPDATE farms SET name = ?, location = ?, area_hectares = ?, field_count = ?, crops_json = ?, status = ?, updated_at = ? WHERE id = ? AND owner_id = ?", (data["name"], data["location"], data["area"], data["fields"], json.dumps(data["crops"]), data["status"], now, farm_id, owner_id))
+        conn.commit()
+        row = conn.execute("SELECT * FROM farms WHERE id = ? AND owner_id = ?", (farm_id, owner_id)).fetchone()
+        return _farm_to_dict(row) if row else None
     finally:
         conn.close()

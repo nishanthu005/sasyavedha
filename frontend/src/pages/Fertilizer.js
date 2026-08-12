@@ -30,7 +30,6 @@ export default function Fertilizer() {
           <div className="page-title"> {t.fertilizerTitle}</div>
           <div className="page-sub">{t.fertilizerSub}</div>
         </div>
-        <span className="tag tag-purple">NPK Analysis</span>
       </div>
 
       {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', color: '#EF4444', fontSize: '13px' }}> {error}</div>}

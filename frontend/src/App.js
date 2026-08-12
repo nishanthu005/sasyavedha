@@ -26,18 +26,7 @@ import './App.css';
 function AppInner() {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState('dashboard');
-  const [sensorData, setSensorData] = useState({ temp: 28.4, moisture: 62 });
   const [isEnterpriseMode, setIsEnterpriseMode] = useState(true); // Toggle between normal and enterprise
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setSensorData({
-        temp: +(28 + Math.sin(Date.now() / 5000) * 2).toFixed(1),
-        moisture: Math.floor(60 + Math.cos(Date.now() / 7000) * 8)
-      });
-    }, 2000);
-    return () => clearInterval(interval);
-  }, []);
 
   const pages = {
     dashboard: Dashboard,
@@ -81,7 +70,6 @@ function AppInner() {
         <Sidebar 
           activeTab={activeTab} 
           setActiveTab={setActiveTab} 
-          sensorData={sensorData}
           isEnterpriseMode={isEnterpriseMode}
           onToggleMode={() => {
             setIsEnterpriseMode(true);
@@ -142,4 +130,3 @@ function AppWithAuth() {
 }
 
 export default App;
-

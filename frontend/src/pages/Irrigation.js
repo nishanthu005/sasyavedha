@@ -4,7 +4,7 @@ import { useLang } from '../context/LanguageContext';
 import { getCropLabel, getLocalizedApiText } from '../context/cropLocalization';
 
 const crops = ['Rice', 'Wheat', 'Tomato', 'Maize', 'Cotton'];
-const defaults = { crop: 'Rice', soil_moisture: 45, temperature: 30, humidity: 65, rain_forecast_mm: 0, field_area: 2 };
+const defaults = { crop: 'Rice', location: 'Pune, Maharashtra', field_area: 2 };
 const urgencyStyle = {
   HIGH: { color: '#EF4444', tagClass: 'tag-red', bg: 'rgba(239,68,68,0.08)', border: 'rgba(239,68,68,0.3)' },
   MEDIUM: { color: '#F59E0B', tagClass: 'tag-orange', bg: 'rgba(245,158,11,0.08)', border: 'rgba(245,158,11,0.3)' },
@@ -35,14 +35,13 @@ export default function Irrigation() {
           <div className="page-title"> {t.irrigationTitle}</div>
           <div className="page-sub">{t.irrigationSub}</div>
         </div>
-        <span className="tag tag-blue">{t.iotTag}</span>
       </div>
 
       {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', color: '#EF4444', fontSize: '13px' }}> {error}</div>}
 
       <div className="grid-2">
         <div className="card mb-20">
-          <div className="section-title"> {t.sensorData}</div>
+          <div className="section-title">Farm details</div>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '14px', marginBottom: '18px' }}>
             <div style={{ gridColumn: '1 / -1' }}>
               <label>{t.cropType}</label>
@@ -50,25 +49,12 @@ export default function Irrigation() {
                 {crops.map(c => <option key={c} value={c}>{getCropLabel(c, lang)}</option>)}
               </select>
             </div>
-            {[
-              { key: 'soil_moisture', label: t.soilMoisture },
-              { key: 'temperature', label: t.temperature },
-              { key: 'humidity', label: t.humidity },
-              { key: 'rain_forecast_mm', label: t.rainForecast },
-              { key: 'field_area', label: t.fieldArea, step: 0.1 },
-            ].map(f => (
+            {[{ key: 'location', label: 'Farm location', type: 'text' }, { key: 'field_area', label: t.fieldArea, step: 0.1 }].map(f => (
               <div key={f.key}>
                 <label>{f.label}</label>
-                <input type="number" className="input" value={form[f.key]} step={f.step || 1} onChange={e => update(f.key, parseFloat(e.target.value) || 0)} />
+                <input type={f.type || 'number'} className="input" value={form[f.key]} step={f.step || 1} onChange={e => update(f.key, f.type === 'text' ? e.target.value : parseFloat(e.target.value) || 0)} />
               </div>
             ))}
-          </div>
-          <div style={{ background: 'var(--bg)', borderRadius: '10px', padding: '14px', marginBottom: '16px', border: '1px solid var(--border)' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', fontSize: '13px' }}>
-              <span style={{ color: 'var(--text-muted)' }}>{t.moistureLevel}</span>
-              <span style={{ fontWeight: 700, color: form.soil_moisture < 40 ? '#EF4444' : form.soil_moisture < 60 ? '#F59E0B' : '#4ADE80' }}>{form.soil_moisture}%</span>
-            </div>
-            <input type="range" min="0" max="100" value={form.soil_moisture} onChange={e => update('soil_moisture', parseInt(e.target.value))} style={{ width: '100%', accentColor: form.soil_moisture < 40 ? '#EF4444' : '#4ADE80' }} />
           </div>
           <button className="btn btn-blue" onClick={submit} disabled={loading} style={{ width: '100%' }}>
             {loading ? <><span className="spinner" /> {t.calculating}</> : ` ${t.getAdvice}`}
@@ -82,16 +68,11 @@ export default function Irrigation() {
             <div className="fade-in">
               <div style={{ background: s.bg, border: `1px solid ${s.border}`, borderRadius: '16px', padding: '22px', marginBottom: '16px' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-                  <div style={{ fontSize: '14px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>{t.moistureLevel}</div>
+                  <div style={{ fontSize: '14px', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>Weather-based water need</div>
                   <span className={`tag ${s.tagClass}`}>{result.urgency}</span>
                 </div>
                 <div style={{ fontSize: '18px', fontWeight: 800, color: s.color, marginBottom: '12px' }}>{getLocalizedApiText(result.moisture_status, lang)}</div>
-                <div className="progress-bar" style={{ height: '12px', marginBottom: '6px' }}>
-                  <div className="progress-fill" style={{ width: `${result.soil_moisture}%`, background: `linear-gradient(90deg, ${s.color}80, ${s.color})` }} />
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '11px', color: 'var(--text-muted)' }}>
-                  <span>{result.soil_moisture}%</span><span>{result.optimal_range}</span>
-                </div>
+                <div style={{ fontSize: '12px', color: 'var(--text-muted)' }}>{result.weather.location}: {result.weather.temperature}°C, {result.weather.humidity}% humidity, {result.weather.forecast_rainfall} mm forecast rain</div>
               </div>
               <div className="card mb-20">
                 <div className="section-title"> {t.recommendation}</div>

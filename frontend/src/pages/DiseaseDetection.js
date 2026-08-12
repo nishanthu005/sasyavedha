@@ -47,7 +47,6 @@ export default function DiseaseDetection() {
           <div className="page-title"> {t.diseaseTitle}</div>
           <div className="page-sub">{t.diseaseSub}</div>
         </div>
-        <span className="tag tag-green">CNN · PlantVillage · 54K+ Images</span>
       </div>
 
       {error && <div style={{ background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: '10px', padding: '12px 16px', marginBottom: '20px', color: '#EF4444', fontSize: '13px' }}> {error}</div>}
@@ -90,7 +89,7 @@ export default function DiseaseDetection() {
 
           <div className="card card-accent-cyan">
             <div className="section-title"> {t.modelInfo}</div>
-            {[[t.architecture, 'CNN (VGG16 Transfer Learning)'], [t.dataset, 'PlantVillage (54,306 images)'], [t.classes, '38 disease classes'], [t.accuracy, '94.2% on test set'], [t.framework, 'TensorFlow / Keras']].map(([k, v]) => (
+            {[[t.architecture, 'MobileNetV2 transfer-learning CNN'], [t.dataset, 'Labelled PlantVillage leaf images'], [t.classes, 'Classes in trained model'], [t.accuracy, 'Shown after local validation'], [t.framework, 'TensorFlow / Keras']].map(([k, v]) => (
               <div key={k} style={{ display: 'flex', justifyContent: 'space-between', padding: '6px 0', borderBottom: '1px solid var(--border)', fontSize: '13px' }}>
                 <span style={{ color: 'var(--text-muted)' }}>{k}</span>
                 <span style={{ color: '#CBD5E1', fontWeight: 600 }}>{v}</span>
@@ -114,7 +113,7 @@ export default function DiseaseDetection() {
             <div className="card" style={{ textAlign: 'center', padding: '60px 20px', color: 'var(--text-muted)' }}>
               <div style={{ fontSize: '48px', marginBottom: '14px' }}></div>
               <div style={{ fontWeight: 600, marginBottom: '8px' }}>{t.uploadToStart}</div>
-              <div style={{ fontSize: '13px' }}>{t.orDemo}</div>
+              <div style={{ fontSize: '13px' }}>Upload a leaf image to begin analysis.</div>
             </div>
           )}
           {!loading && result && (
